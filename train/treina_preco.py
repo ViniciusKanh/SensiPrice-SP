@@ -26,6 +26,26 @@ from transformers import (
 
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
+# --- localizar o root do projeto e importar o lexico ---
+import sys
+from pathlib import Path as _PathForLex
+_PROJ_ROOT = _PathForLex(__file__).resolve().parents[1]
+if str(_PROJ_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJ_ROOT))
+
+try:
+    # 1ª tentativa: se você mantém lexico.py em app/utils/lexico.py
+    from app.utils.lexico import (
+        load_lexico, load_lexico_sintetico,
+        weak_label_price_sensitive, mark_price_spans
+    )
+except Exception:
+    # 2ª tentativa: lexico.py na raiz do projeto
+    from lexico import (
+        load_lexico, load_lexico_sintetico,
+        weak_label_price_sensitive, mark_price_spans
+    )
+
 # Para geração sintética se necessário
 def _maybe_generate_synthetic(csv_path: Path, lexico_path: Path, n_pos: int, n_neg: int, seed: int):
     """

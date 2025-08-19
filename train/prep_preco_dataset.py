@@ -22,16 +22,20 @@ from pathlib import Path
 import pandas as pd
 
 # utilitários de léxico (rotulador e marcação)
+# utilitários de léxico
 try:
+    # 1ª tentativa: se você mantém lexico.py em app/utils/lexico.py
+    from app.utils.lexico import (
+        load_lexico, load_lexico_sintetico,
+        weak_label_price_sensitive, mark_price_spans
+    )
+except Exception:
+    # 2ª tentativa: lexico.py na raiz do projeto
     from lexico import (
-        load_lexico,
-        load_lexico_sintetico,
-        weak_label_price_sensitive,
-        mark_price_spans,
-    )  # type: ignore
-except Exception as e:
-    print("❌ Import de 'lexico.py' falhou:", e, file=sys.stderr)
-    raise
+        load_lexico, load_lexico_sintetico,
+        weak_label_price_sensitive, mark_price_spans
+    )
+
 
 RAW_XLSX_DEFAULT = Path("data/Relacionamento_e_NPS.xlsx")
 OUT_CSV_DEFAULT  = Path("data/sensi_preco_dataset.csv")
@@ -91,33 +95,42 @@ def generate_synthetic_dataset(lexico_path: Path, out_csv: Path, n_pos: int, n_n
     soft_templates = list(sint.get("soft_templates", ["estamos com [PRICE]{x}[/PRICE]."]))
     neg_templates  = list(sint.get("neg_templates", ["{x}."]))
 
+    # >>>>>>> FIX AQUI: sorteia só categorias que EXISTEM <<<<<<<<
+    buckets = []
+    if hard: buckets.append("HARD")
+    if soft: buckets.append("SOFT")
+    if bill: buckets.append("BILLING")
+    if macro: buckets.append("MACRO")
+    if not buckets and hard:
+        buckets = ["HARD"]              # se só tem HARD, usa só HARD
+    if not buckets:
+        raise ValueError("Nenhum gatilho positivo encontrado no léxico sintético.")
+
     rows = []
 
     def mk_pos():
-        bucket = rng.choice(["HARD","SOFT","BILLING","MACRO"])
-        if bucket == "HARD" and hard:
+        bucket = rng.choice(buckets)
+        if bucket == "HARD":
             x = rng.choice(hard)
             tpl = rng.choice(pos_templates)
-        elif bucket == "SOFT" and soft:
+        elif bucket == "SOFT":
             x = rng.choice(soft)
             tpl = rng.choice(soft_templates or pos_templates)
-        elif bucket == "BILLING" and bill:
-            # Reforça intensidade para casar com regra de "billing"
+        elif bucket == "BILLING":
             x = rng.choice(bill)
-            # injeta alguma intensidade/reajuste na frase
+            # reforço de intensidade (opcional; não usado se você não tem BILLING)
             intensifiers = ["alta", "elevada", "caro", "com reajuste", "com aumento"]
-            x = f"{x} {rng.choice(intensifiers)}"
+            if rng.random() < 0.5:
+                x = f"{x} {rng.choice(intensifiers)}"
             tpl = rng.choice(pos_templates)
         else:  # MACRO
-            x = rng.choice(macro or ["condições comerciais desfavoráveis"])
+            x = rng.choice(macro)
             tpl = rng.choice(pos_templates)
-        sent = tpl.format(x=x)
-        return sent, 1
+        return tpl.format(x=x), 1
 
     def mk_neg():
-        x = rng.choice(negs or ["preço justo", "bom custo-benefício"])
-        sent = rng.choice(neg_templates).format(x=x)
-        return sent, 0
+        x = rng.choice(negs or ["preço justo"])
+        return (rng.choice(neg_templates).format(x=x), 0)
 
     for _ in range(int(n_pos)):
         rows.append(mk_pos())
@@ -126,16 +139,14 @@ def generate_synthetic_dataset(lexico_path: Path, out_csv: Path, n_pos: int, n_n
 
     rng.shuffle(rows)
 
-    # salva CSV
     out_csv.parent.mkdir(parents=True, exist_ok=True)
-    import csv
     with out_csv.open("w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f, delimiter=";", quoting=csv.QUOTE_ALL, lineterminator="\r\n")
         w.writerow(["texto","label"])
-        for texto, label in rows:
-            w.writerow([texto, label])
+        w.writerows(rows)
 
     print(f"✅ Gerado dataset sintético: {out_csv.resolve()}  (pos={n_pos}, neg={n_neg})")
+
 
 # ------------------------------
 # (A) Modo Excel: rotulação fraca
