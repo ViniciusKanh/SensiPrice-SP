@@ -1,0 +1,63 @@
+{
+  "positivos": {
+    "hard": [
+      "r:\\bredu(?:ç|c)(?:[ãa]o|ir)\\s+(do\\s+)?escopo\\b",
+      "r:\\bredu(?:ç|c)(?:[ãa]o|ir)\\s+(de|dos|nos)\\s+custo(s)?\\b",
+      "r:\\b(?:est[áa]|t[áa]|esta)\\s+car[oa]s?\\b",
+      "r:\\bmais\\s+em\\s+conta\\b",
+      "r:\\bmais\\s+barat[oa]s?\\b",
+      "r:\\bpre[cç]o(s)?\\s+reduzid[oa]s?\\b",
+      "r:\\bpre[cç]o(s)?\\s+elevad[oa]s?\\b"
+    ],
+    "soft_budget": [],
+    "billing": [],
+    "macro": []
+  },
+  "negacoes": [
+    "nao", "não", "sem", "nunca", "jamais", "n", "nem"
+  ],
+  "exclusoes": [
+    "r:(^|[\\.,;!\\-\\(]\\s*)car[oa]\\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][\\wÁÉÍÓÚÂÊÔÃÕÇ]+[,:-]",
+    "r:^\\s*prezad[oa]s?\\b",
+    "r:\\bn(ao|ão)\\s+est(a|á)\\s+car[oa]\\b",
+    "r:\\bo\\s+pre[cç]o\\s+n(ao|ão)\\s+([ée]|e)\\s+o\\s+problema\\b",
+    "r:\\bpre[cç]o\\s+justo\\b",
+    "r:\\bbom\\s+custo[-\\s]?benefic[ií]o\\b",
+    "r:\\b[oó]timo\\s+custo[-\\s]?benefic[ií]o\\b"
+  ],
+  "janela_negacao_palavras": 8,
+  "sintetico": {
+    "hard_phrases": [
+      "redução de escopo",
+      "redução de custo",
+      "está caro",
+      "tá caro",
+      "mais em conta",
+      "mais barato",
+      "preço reduzido",
+      "preço elevado"
+    ],
+    "soft_phrases": [],
+    "billing_phrases": [],
+    "macro_phrases": [],
+    "neg_safe_phrases": [
+      "não está caro",
+      "preço justo",
+      "o preço não é o problema",
+      "instabilidade na plataforma",
+      "bug recorrente",
+      "suporte demorou"
+    ],
+    "pos_templates": [
+      "o cliente mencionou [PRICE]{x}[/PRICE].",
+      "comentaram sobre [PRICE]{x}[/PRICE].",
+      "há sinal de [PRICE]{x}[/PRICE]."
+    ],
+    "soft_templates": [],
+    "neg_templates": [
+      "o cliente relatou: {x}.",
+      "observação: {x}."
+    ],
+    "samples": { "n_pos": 1000, "n_neg": 1200, "seed": 42 }
+  }
+}

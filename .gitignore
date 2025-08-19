@@ -1,0 +1,67 @@
+@"
+# -------- OS junk --------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -------- Python --------
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+*.log
+*.tmp
+*.lock
+
+# -------- Virtual env --------
+.env
+.env.*
+*.env
+.venv/
+venv/
+env/
+ENV/
+
+# -------- Jupyter/IDE --------
+.ipynb_checkpoints/
+.vscode/
+.idea/
+*.code-workspace
+
+# -------- Caches --------
+.cache/
+.huggingface/
+huggingface/
+transformers_cache/
+
+# Excel temp
+~$*.xlsx
+
+# -------- Project specific --------
+# Dados gerados localmente (nao versionar)
+data/**
+!data/.gitkeep
+
+# Modelos treinados/baixados (nao versionar)
+app/model/**
+!app/model/.gitkeep
+
+# Pesos e checkpoints em geral
+*.pt
+*.bin
+*.safetensors
+*.ckpt
+*.onnx
+*.h5
+
+# Bytecode em subpastas do projeto
+lexico/__pycache__/
+train/__pycache__/
+tests/__pycache__/
+scripts/__pycache__/
+"@ | Set-Content -Encoding utf8 .gitignore
